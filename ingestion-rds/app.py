@@ -5,18 +5,53 @@ from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 from model import Coins
 
 
+def check_if_valid_data(df: pd.DataFrame) -> bool:
+
+    # Check if dataframe is empty
+    if df.empty:
+        print("\nDataframe empty. Finishing execution")
+        return False
+
+    # Check for nulls
+    if df.symbol.empty:
+        raise Exception("\nSymbol is Null or the value is empty")
+
+    # Check for nulls
+    if df.price.empty:
+        raise Exception("\nPrice is Null or the value is empty")
+
+    # Check for nulls
+    if df.date_added.empty:
+        raise Exception("\nDate_added is Null or the value is empty")
+
+    return True
+
+
 def load_data(table_name, coins_df, session_db, engine_db):
 
-    coins_df.to_sql(table_name, engine_db, index=False, if_exists='append')
+    # validate
+    if check_if_valid_data(coins_df):
+        print("\nData valid, proceed to load stage")
+
+    # load data on database
+    try:    
+        coins_df.to_sql(table_name, engine_db, index=False, if_exists='append')
+        print("\nData loaded on database")
+
+    except Exception as err:
+        print(f"\nFail to load data on database: {err}")
+
 
     session_db.commit()
     session_db.close()
+    print("\nClose database sucessfully")
 
     return session_db
 
+
 def get_data(session_db, engine_db, start, limit, convert, key, url):
 
-    # Set limit of data from api
+    # set limit of data from api
     parameters = {
         'start': start,
         'limit': limit,
@@ -88,9 +123,14 @@ def get_data(session_db, engine_db, start, limit, convert, key, url):
     print("Data on pandas dataframe:\n")
     print(coins_df.head(15))
 
+    # call the function to load data on database
+    load_data('tb_coins', coins_df, session_db, engine_db)
 
+# Make the coin table
 get_session_db, get_engine_db = Coins.start()
 
+
+# call the get_data function and load data on database
 get_data(session_db=get_session_db,
          engine_db=get_engine_db,
          start=1, 
