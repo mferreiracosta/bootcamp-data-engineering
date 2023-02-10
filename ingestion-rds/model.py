@@ -26,7 +26,7 @@ class Coins(Base):
         engine = create_engine(db_string)
         Session = sessionmaker(bind=engine)
         session = Session()
-        Base.metada.create_all(engine)
+        Base.metadata.create_all(engine)
         print("\nTable created on database")
 
         return session, engine
