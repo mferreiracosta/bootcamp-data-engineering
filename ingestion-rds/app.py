@@ -1,10 +1,20 @@
-from requests import Request, Session
-from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 import json
 import pandas as pd
+from requests import Request, Session
+from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
+from model import Coins
 
 
-def get_data(start, limit, convert, key, url):
+def load_data(table_name, coins_df, session_db, engine_db):
+
+    coins_df.to_sql(table_name, engine_db, index=False, if_exists='append')
+
+    session_db.commit()
+    session_db.close()
+
+    return session_db
+
+def get_data(session_db, engine_db, start, limit, convert, key, url):
 
     # Set limit of data from api
     parameters = {
@@ -79,9 +89,11 @@ def get_data(start, limit, convert, key, url):
     print(coins_df.head(15))
 
 
+get_session_db, get_engine_db = Coins.start()
 
-
-get_data(start=1, 
+get_data(session_db=get_session_db,
+         engine_db=get_engine_db,
+         start=1, 
          limit=5, 
          convert='USD', 
          key='4cdda4de-d018-4298-a662-4668d8b658ba', 
