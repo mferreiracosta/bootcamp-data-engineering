@@ -98,7 +98,6 @@ def get_data(session_db, engine_db, start, limit, convert, key, url):
             percent_change_24h.append(coin['quote']['USD']['percent_change_24h'])
             percent_change_7d.append(coin['quote']['USD']['percent_change_7d'])
 
-
         # Prepare a dictionary in order to turn it into a pandas dataframe below
         coin_dict = {
             "name": name,
@@ -126,9 +125,9 @@ def get_data(session_db, engine_db, start, limit, convert, key, url):
     # call the function to load data on database
     load_data('tb_coins', coins_df, session_db, engine_db)
 
+
 # Make the coin table
 get_session_db, get_engine_db = Coins.start()
-
 
 # call the get_data function and load data on database
 get_data(session_db=get_session_db,
