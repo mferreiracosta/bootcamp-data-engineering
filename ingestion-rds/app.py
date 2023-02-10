@@ -80,7 +80,9 @@ def get_data(start, limit, convert, key, url):
 
 
 
-url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest'
-key = '4cdda4de-d018-4298-a662-4668d8b658ba'
 
-print(get_data(start=1, limit=5, convert='USD', key=key, url=url))
+get_data(start=1, 
+         limit=5, 
+         convert='USD', 
+         key='4cdda4de-d018-4298-a662-4668d8b658ba', 
+         url='https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest')
