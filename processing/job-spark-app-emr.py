@@ -64,7 +64,27 @@ def write_gold(bucket, path, dataframe, data_format, mode):
         print (f"Falha para escrever dados na gold: {err}")
         return 1
 
-
+# função para criar analíticos a partir dos dados da silver zone e persistir na camada gold
+def analytics_table(bucket, dataframe, table_name):
+    # cria uma view para trabalhar com sql
+    dataframe.createOrReplaceTempView(table_name)
+    # processa os dados conforme regra de negócio
+    df_query1 = dataframe.groupBy("name") \
+                .agg(sum("circulating_supply").alias("circulating_supply")) \
+                .sort(desc("circulating_supply")) \
+                .limit(10)
+    df_query2 = dataframe.select(col("name"), col("symbol"), col("price")) \
+                .sort(desc("price")) \
+                .limit(10)
+    # imprime o resultado do dataframe criado
+    print ("\n Top 10 Cryptomoedas com maior fornecimento de circulação  no mercado\n")
+    print (df_query1.show())
+    print ("\n Top 10 Cryptomoedas com preços mais altos de 2022\n")
+    print (df_query2.show())
+    # escreve na camada gold os analíticos criados
+    write_gold(f"{bucket}", "coins_circulating_supply", df_query1, "delta", "overwrite")
+    write_gold(f"{bucket}", "top10_prices_2022", df_query1, "delta", "overwrite")
+    
 
 # Ler dados da bronze
 df = read_csv("s3://bronze-stack-bootcampde", "public/tb_coins/")
@@ -77,4 +97,11 @@ write_silver("s3://silver-stack-bootcampde", "tb_coins", df, "year", "delta", "o
 
 # Ler os dados da silver e escreve na camada gold
 df = read_delta("s3://gold-stack-bootcampde", "tb_coins")
+
+analytics_table("s3://silver-stack-bootcampde", df, "tb_coins")
+
+# Finaliza a aplicação
+spark.stop()
+
+
 
