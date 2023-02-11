@@ -9,3 +9,6 @@ spark = SparkSession \
     .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
     .getOrCreate()
 
+# definindo o método de logging da aplicação. use INFO somente em DEV [INFO, ERROR]
+spark.sparkContext.setLogLevel("ERROR")
+
