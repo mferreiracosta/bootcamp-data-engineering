@@ -36,3 +36,32 @@ def read_delta(bucket, path):
         .load(f"{bucket}/{path}")
     
     return df
+
+# cria a função para escrever os dados processados em delta na camada silver
+def write_processed(bucket, path, dataframe, col_partition, data_format, mode):
+    print("\nEscrevendo os dados lidos da bronze para delta na silver zone...")
+    try:
+        dataframe.write.format(data_format) \
+            .partitionBy(col_partition) \
+            .mode(mode) \
+            .save(f"{bucket}/{path}")
+
+        print(f"Dados escritos na silver com sucesso!")
+
+        return 0
+
+    except Exception as err:
+
+        print(f"Falha para escrever os dados na silver: {err}")
+        
+        return 1
+
+
+# Ler dados da bronze
+df = read_csv("s3://bronze-stack-bootcampde", "public/tb_coins/")
+
+# Cria uma coluna de ano para particionar os dados
+df = df.withColumn("year", year(df.date_added))
+
+# Processa os dados e escreve na camada silver
+write_processed("s3://silver-stack-bootcampde", "tb_coins", df, "year", "delta", "overwrite")
