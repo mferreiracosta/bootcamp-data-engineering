@@ -96,9 +96,9 @@ df = df.withColumn("year", year(df.date_added))
 write_silver("s3://silver-stack-bootcampde", "tb_coins", df, "year", "delta", "overwrite")
 
 # Ler os dados da silver e escreve na camada gold
-df = read_delta("s3://gold-stack-bootcampde", "tb_coins")
+df = read_delta("s3://silver-stack-bootcampde", "tb_coins")
 
-analytics_table("s3://silver-stack-bootcampde", df, "tb_coins")
+analytics_table("s3://gold-stack-bootcampde", df, "tb_coins")
 
 # Finaliza a aplicação
 spark.stop()
